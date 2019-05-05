@@ -212,6 +212,9 @@ class Post(models.Model):
 ### Decorators in views
 
 ```python
+from keeper.views import keeper
+
+
 @keeper(
     'edit',
     model=Post,
@@ -226,7 +229,9 @@ def post_change(request, post_id):
 
 ### Tags in templates
 
-```python
+```html
+{% load keeper %}
+
 {% has_permission post, 'delete' as can_delete %}
 {% if can_detele %}
     <a href="{% url 'blog:post_delete' post_id=post.id %}">Delete</a>
@@ -301,6 +306,53 @@ class HasSubscription(Authenticated):
 [
     (Allow, HasSubscription(PLAN_PREMIUM), 'view'),
 ]
+```
+
++++
+
+### @keeper decorator
+
+```python
+@keeper(
+    'view',
+    model=Post,
+    mapper=lambda request, post_id: {'id': post_id}
+)
+```
+
+It specifies way to get target models
+and required permission.
+
++++
+
+### Changing on_fail action
+
+```python
+from keeper.views import not_found
+
+
+@keeper(
+    ...,
+    on_fail=not_found,
+)
+```
+
+Displays 404 page if user can't access the page
+(like GitHub's 404 page for private repos).
+
+* [Default on_fail actions](https://github.com/hirokiky/django-keeper/blob/master/keeper/views.py)
+
++++
+
+### Template tags
+
+```html
+{% load keeper %}
+
+{% has_permission post, 'delete' as can_delete %}
+{% if can_detele %}
+    <a href="{% url 'blog:post_delete' post_id=post.id %}">Delete</a>
+{% endif %}
 ```
 
 +++
