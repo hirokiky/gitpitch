@@ -187,11 +187,133 @@ def post_change(request, post_id):
 
 +++
 
-## What can keeper do?
-
-*
+## At a glance
 
 +++
+
+### ACLs in models
+
+```python
+from keeper.operators import Everyone, IsUser
+from keeper.security import Allow
+
+
+class Post(models.Model):
+    ...
+    def __acl__(self):
+        return [
+            (Allow, Everyone, 'view'),
+            (Allow, IsUser(self.author), 'edit'),
+        ]
+```
+
++++
+
+### Decorators in views
+
+```python
+@keeper(
+    'edit',
+    model=Post,
+    mapper=lambda request, post_id: {'id': post_id},
+    
+)
+def post_change(request, post_id):
+    request.k_context  # Post has post_id
+```
+
++++
+
+### Tags in templates
+
+```python
+{% has_permission post, 'delete' as can_delete %}
+{% if can_detele %}
+    <a href="{% url 'blog:post_delete' post_id=post.id %}">Delete</a>
+{% endif %}
+```
+
++++
+
+### In models
+
+List contains tuples (**Action**, **Who**, **Permission**).
+
+```python
+(Allow, IsUser(self.author), 'edit'),
+```
+
+It will identify what kind of "permissions" each requests has.
+(If `post.author` is `request.user`, the request can `"edit"`).
+
++++
+
+### Dynamic ACLs
+
+```python
+class Post(models.Model):
+    def __acl__(self):
+        if self.draft:
+            return [
+                (Allow, IsUser(self.author),
+                 ('view', 'edit', 'delete')),
+            ]
+        else:
+            return [
+                (Allow, Everyone, 'view'),
+                (Allow, IsUser(self.author),
+                 ('view', 'delete')),
+            ]
+```
+
++++
+
+### Operators
+
+These `Everyone`, `IsUser` are "Operators".
+It should be callable to take HttpRequests and return Bool.
+
+* [Default operators](https://github.com/hirokiky/django-keeper/blob/master/keeper/operators.py)
+
++++
+
+### Own Operators
+
+```python
+from keeper.operators import Authenticated
+
+
+class HasSubscription(Authenticated):
+    def __init__(self, plan_code):
+        self.plan_code = plan_code
+
+    def __call__(self, request):
+        if not super().__call__(request):
+            return False
+        request.user.sub.plan.code is self.plan_code
+```
+
++++
+
+### Own Operators
+
+```python
+[
+    (Allow, HasSubscription(PLAN_PREMIUM), 'view'),
+]
+```
+
++++
+
+### Global Context
+
+
++++
+
+* Too much for small projects
+
++++
+
 
 ## Things keeper can't do
 
@@ -200,10 +322,6 @@ def post_change(request, post_id):
 
 +++
 
-### Pre fetching
-
-```python
-```
 
 +++
 
@@ -216,6 +334,10 @@ def post_change(request, post_id):
 ---
 
 ## keeper in Production
+
++++
+
+Try django-keeper and send Pull-Requests.
 
 ---
 
