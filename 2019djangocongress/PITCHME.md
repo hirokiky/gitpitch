@@ -101,8 +101,8 @@ can WHO DO THIS ?
 ### Views
 
 ```python
-def post_change(request, blog_id):
-    post = get_object_or_404(Post, id=blog_id)
+def post_change(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
     if request.user is not post.author:
         return HttpResponseForbidden()
     ...
@@ -125,7 +125,7 @@ def post_change(request, blog_id):
 ```python
 @login_required
 @premium_sub_required
-def post_detail(request, blog_id):
+def post_detail(request, post_id):
     ...
 ```
 
@@ -151,9 +151,10 @@ We need to chnage all of affected Viwes/Templates
 ### Django Permission
 
 ```python
-content_type = ContentType.objects.get_for_model(BlogPost)
+content_type = ContentType.objects.\
+                   get_for_model(Post)
 permission = Permission.objects.get(
-    codename='change_blogpost',
+    codename='change_post',
     content_type=content_type,
 )
 user.user_permissions.add(permission)
@@ -164,8 +165,8 @@ user.user_permissions.add(permission)
 ### With decorator
 
 ```python
-@permission_required('myapp.change_blogpost')
-def post_change(request, blog_id):
+@permission_required(blog.change_post')
+def post_change(request, post_id):
     ...
 ```
 
@@ -183,6 +184,12 @@ def post_change(request, blog_id):
 ---
 
 ## django-keeper
+
++++
+
+## What can keeper do?
+
+*
 
 +++
 
