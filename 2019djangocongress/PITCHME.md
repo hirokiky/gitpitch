@@ -10,22 +10,24 @@ Hiroki Kiyohara @hirokiky
 
 +++
 
-### Authorization
+## On this talk
 
-認可 (Nin-Ka)
+You can learn
 
-### More simply
-
-WHAT you can do
+* Difference between Authn / Authz
+* Nicer to handle Authz in Django
 
 +++
 
-### requirements.txt
+## Authorization
 
-```
-Django>=intermediate
-web>=intermediate
-```
+認可 (Nin-Ka)
+
++++
+
+## More simply
+
+WHAT you can do
 
 +++
 
@@ -41,11 +43,17 @@ http://slides.hirokiky.org/pyconjp2017.html
 
 +++
 
-### @hirokiky
+## @hirokiky
+
+* Hiroki Kiyohara
+* Created [PyQ](https://pyq.jp/), [dig-en.com](https://dig-en.com/), [PileMd](https://pilemd.com/)
+* Chairperson of DjangoCongress JP 2018, 2019
 
 +++
 
 ### PyQ
+
+![PyQ-ScreenShots](2019djangocongress/images/pyq_ss.png)
 
 ---
 
@@ -53,38 +61,124 @@ http://slides.hirokiky.org/pyconjp2017.html
 
 +++
 
+## Authn / Authz
+
 * Authn: 認証 (Nin-Sho)
 * Authz: 認可 (Nin-Ka)
 
 +++
 
-### Authentication
+## Authentication
 
 WHO you are
 
 +++
 
-### Authorization
+## Authorization
 
 WHAT you can do
 
 +++
 
-### What's WHAT
+## What's WHAT
 
 can WHO DO THIS ?
 
 +++
 
-### Similar words
+## Similar words
 
 * Permission
 * scope
-* 403 Forbidden
+* Forbidden (403)
 
 ---
 
 ## Authz in Django
+
++++
+
+### Views
+
+```python
+def post_change(request, blog_id):
+    post = get_object_or_404(Post, id=blog_id)
+    if request.user is not post.author:
+        return HttpResponseForbidden()
+    ...
+```
+
++++
+
+### Views
+
+* Pros:
+    * Easy
+* Cons:
+    * Complication
+    * Duplication
+
++++
+
+### Decorators
+
+```python
+@login_required
+@premium_sub_required
+def post_detail(request, blog_id):
+    ...
+```
+
++++
+
+### Decorators
+
+* Pros
+    * Smarter
+    * Enoughly Work
+* Cons
+    * Hard to change condition
+    * Can't use in Template
+    
++++
+
+Now "Standard" users can use some "Premium" features.
+We need to chnage all of affected Viwes/Templates
+(In startup projects, specs often changes dramatically...)
+
++++
+
+### Django Permission
+
+```python
+content_type = ContentType.objects.get_for_model(BlogPost)
+permission = Permission.objects.get(
+    codename='change_blogpost',
+    content_type=content_type,
+)
+user.user_permissions.add(permission)
+```
+
++++
+
+### With decorator
+
+```python
+@permission_required('myapp.change_blogpost')
+def post_change(request, blog_id):
+    ...
+```
+
++++
+
+### Pros and Cons
+
+* Pros
+    * Default feature
+    * Integration with Admin
+* Cons
+    * Dynamic data
+    * Hard to change conditions
 
 ---
 
@@ -92,14 +186,21 @@ can WHO DO THIS ?
 
 +++
 
-### Things keeper can't do
+## Things keeper can't do
 
 * List filtering
 * Cache
 
 +++
 
-### Similar Libs
+### Pre fetching
+
+```python
+```
+
++++
+
+## Similar Libs
 
 * Django's Permission
 * django-gurdian
