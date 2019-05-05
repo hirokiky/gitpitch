@@ -197,7 +197,6 @@ def post_change(request, post_id):
 from keeper.operators import Everyone, IsUser
 from keeper.security import Allow
 
-
 class Post(models.Model):
     ...
     def __acl__(self):
@@ -213,7 +212,6 @@ class Post(models.Model):
 
 ```python
 from keeper.views import keeper
-
 
 @keeper(
     'edit',
@@ -259,16 +257,12 @@ It will identify what kind of "permissions" each requests has.
 class Post(models.Model):
     def __acl__(self):
         if self.draft:
-            return [
-                (Allow, IsUser(self.author),
-                 ('view', 'edit', 'delete')),
-            ]
+            return [(Allow, IsUser(self.author),
+                     ('view', 'edit', 'delete'))]
         else:
-            return [
-                (Allow, Everyone, 'view'),
-                (Allow, IsUser(self.author),
-                 ('view', 'delete')),
-            ]
+            return [(Allow, Everyone, 'view'),
+                    (Allow, IsUser(self.author),
+                     ('view', 'delete'))]
 ```
 
 +++
@@ -286,7 +280,6 @@ It should be callable to take HttpRequests and return Bool.
 
 ```python
 from keeper.operators import Authenticated
-
 
 class HasSubscription(Authenticated):
     def __init__(self, plan_code):
@@ -331,7 +324,6 @@ and required permission.
 ```python
 from keeper.views import not_found
 
-
 @keeper(
     ...,
     on_fail=not_found,
@@ -365,7 +357,6 @@ ACL for object-related permissions.
 ```python
 from keeper.operators import Authenticated
 from keeper.security import Allow
-
 
 class GlobalContext:
     def __acl__(self):
