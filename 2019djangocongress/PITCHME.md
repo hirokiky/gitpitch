@@ -295,7 +295,8 @@ class HasSubscription(Authenticated):
     def __call__(self, request):
         if not super().__call__(request):
             return False
-        request.user.sub.plan.code is self.plan_code
+        return request.user.sub.plan.code is \
+            self.plan_code
 ```
 
 +++
@@ -351,7 +352,7 @@ Displays 404 page if user can't access the page
 
 {% has_permission post, 'delete' as can_delete %}
 {% if can_detele %}
-    <a href="{% url 'blog:post_delete' post_id=post.id %}">Delete</a>
+  <a href="{% url 'blog:post_delete' post_id=post.id %}">Delete</a>
 {% endif %}
 ```
 
@@ -359,6 +360,19 @@ Displays 404 page if user can't access the page
 
 ### Global Context
 
+ACL for object-related permissions.
+
+```python
+from keeper.operators import Authenticated
+from keeper.security import Allow
+
+
+class GlobalContext:
+    def __acl__(self):
+        return [
+            (Allow, Authenticated, 'search_posts'),
+        ]
+```
 
 +++
 
@@ -374,6 +388,10 @@ Displays 404 page if user can't access the page
 
 +++
 
+## FAQ
+
+* Should we use @keeper for all views?
+    * No
 
 +++
 
