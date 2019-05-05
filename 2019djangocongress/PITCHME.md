@@ -86,7 +86,7 @@ can WHO DO THIS ?
 
 +++
 
-## Similar words
+## Related things
 
 * Permission
 * scope
@@ -101,7 +101,7 @@ can WHO DO THIS ?
 ### Views
 
 ```python
-def post_change(request, post_id):
+def post_edit(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     if request.user is not post.author:
         return HttpResponseForbidden()
@@ -143,7 +143,7 @@ def post_detail(request, post_id):
 +++
 
 Now "Standard" users can use some "Premium" features.
-We need to chnage all of affected Viwes/Templates
+We need to change all of affected Viwes/Templates
 (In startup projects, specs often changes dramatically...)
 
 +++
@@ -154,7 +154,7 @@ We need to chnage all of affected Viwes/Templates
 content_type = ContentType.objects.\
                    get_for_model(Post)
 permission = Permission.objects.get(
-    codename='change_post',
+    codename=edit',
     content_type=content_type,
 )
 user.user_permissions.add(permission)
@@ -165,8 +165,8 @@ user.user_permissions.add(permission)
 ### With decorator
 
 ```python
-@permission_required(blog.change_post')
-def post_change(request, post_id):
+@permission_required(blog.edit)
+def post_edit(request, post_id):
     ...
 ```
 
@@ -219,7 +219,7 @@ from keeper.views import keeper
     mapper=lambda request, post_id: {'id': post_id},
     
 )
-def post_change(request, post_id):
+def post_edit(request, post_id):
     request.k_context  # Post has post_id
 ```
 
@@ -230,7 +230,7 @@ def post_change(request, post_id):
 ```html
 {% load keeper %}
 
-{% has_permission post, 'delete' as can_delete %}
+{% has_permission post 'delete' as can_delete %}
 {% if can_detele %}
     <a href="{% url 'blog:post_delete' post_id=post.id %}">Delete</a>
 {% endif %}
@@ -262,7 +262,28 @@ class Post(models.Model):
         else:
             return [(Allow, Everyone, 'view'),
                     (Allow, IsUser(self.author),
-                     ('view', 'delete'))]
+                     (edit', 'delete'))]
+```
+
++++
+
+### Dynamic ACLs
+
+Even if you write large ACL, views will be so simple.
+
+```python
+@keeper('view', factory=post_factory)
+def post_detail(request, post_id):
+   ...
+
+@keeper(edit', factory=post_factory)
+def post_edit(request, post_id):
+   ...
+
+@keeper('delete', factory=post_factory)
+def post_delete(request, post_id):
+   ...
+
 ```
 
 +++
@@ -297,10 +318,27 @@ class HasSubscription(Authenticated):
 ### Own Operators
 
 ```python
-[
-    (Allow, HasSubscription(PLAN_PREMIUM), 'view'),
-]
+class Post(models.Model):
+    def __acl__(self):
+        if self.exclusive:
+            return [
+                (Allow,
+                 HasSubscription(PLAN_PREMIUM),
+                 'view')
+            ]
+        else:
+            return [(Allow, Everyone, 'view')]
 ```
+
+No need to change Views.
+
++++
+
+### keeper allows you
+
+* To handle complex authz
+* To describe permissions declaratively
+* Not to change views
 
 +++
 
@@ -314,7 +352,7 @@ class HasSubscription(Authenticated):
 )
 ```
 
-It specifies way to get target models
+It specifies way to get target models (`Post.objects.get(id=post_id)`)
 and required permission.
 
 +++
@@ -352,7 +390,7 @@ Displays 404 page if user can't access the page
 
 ### Global Context
 
-ACL for object-related permissions.
+Not related with objects.
 
 ```python
 from keeper.operators import Authenticated
@@ -367,12 +405,7 @@ class GlobalContext:
 
 +++
 
-* Too much for small projects
-
-+++
-
-
-## Things keeper can't do
+### Things keeper can't do
 
 * List filtering
 * Cache
@@ -381,7 +414,10 @@ class GlobalContext:
 
 ## FAQ
 
-* Should we use @keeper for all views?
+* Should I use django-keeper?
+    * Too much for small projects
+    * If you have some problems now
+* Should I use @keeper for all views?
     * No
 
 +++
@@ -398,7 +434,32 @@ class GlobalContext:
 
 +++
 
-Try django-keeper and send Pull-Requests.
+### Production ready?
+
+Yes.
+But I can't guarantee safety.
+
++++
+
+### Use case
+
+* Personal / Team users
+* Subscription
+* Contents
+    * Default
+    * Plan only
+
++++
+
+Try django-keeper and send Pull-Requests 🙏
+
+---
+
+### Conclution
+
+* Authz is detect WHAT each requests can do
+* Many ways for authz in Django
+* django-keeper will help you in complex projects
 
 ---
 
