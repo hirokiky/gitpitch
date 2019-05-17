@@ -272,6 +272,9 @@ class Post(models.Model):
 Even if you write large ACL, views will be so simple.
 
 ```python
+def post_factory(request, post_id):
+    return get_object_or_404(Post, id=post_id)
+
 @keeper('view', factory=post_factory)
 def post_detail(request, post_id):
    ...
