@@ -154,7 +154,7 @@ We need to change all of affected Viwes/Templates
 content_type = ContentType.objects.\
                    get_for_model(Post)
 permission = Permission.objects.get(
-    codename='edit',
+    codename='publish_post',
     content_type=content_type,
 )
 user.user_permissions.add(permission)
@@ -165,8 +165,8 @@ user.user_permissions.add(permission)
 ### With decorator
 
 ```python
-@permission_required('blog.edit')
-def post_edit(request, post_id):
+@permission_required('blog.publish_post')
+def post_publish(request, post_id):
     ...
 ```
 
