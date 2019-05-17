@@ -262,7 +262,7 @@ class Post(models.Model):
         else:
             return [(Allow, Everyone, 'view'),
                     (Allow, IsUser(self.author),
-                     (edit', 'delete'))]
+                     ('edit', 'delete'))]
 ```
 
 +++
