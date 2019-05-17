@@ -276,7 +276,7 @@ Even if you write large ACL, views will be so simple.
 def post_detail(request, post_id):
    ...
 
-@keeper(edit', factory=post_factory)
+@keeper('edit', factory=post_factory)
 def post_edit(request, post_id):
    ...
 
