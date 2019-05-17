@@ -165,7 +165,7 @@ user.user_permissions.add(permission)
 ### With decorator
 
 ```python
-@permission_required(blog.edit)
+@permission_required('blog.edit')
 def post_edit(request, post_id):
     ...
 ```
