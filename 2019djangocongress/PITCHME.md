@@ -294,7 +294,7 @@ def post_delete(request, post_id):
 ### Operators
 
 These `Everyone`, `IsUser` are "Operators".
-It should be callable to take HttpRequests and return Bool.
+It should be callable which takes HttpRequests and will return Bool.
 
 * [Default operators](https://github.com/hirokiky/django-keeper/blob/master/keeper/operators.py)
 
