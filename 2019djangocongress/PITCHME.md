@@ -341,7 +341,7 @@ No need to change Views.
 
 * To handle complex authz
 * To describe permissions declaratively
-* Not to change views
+* No need to change views and templates
 
 +++
 
